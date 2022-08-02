@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.webkit.JsResult;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -808,6 +811,45 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
         public Bitmap getDefaultVideoPoster() {
           return Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
         }
+
+        // Remove Url in the Android alert title...
+        @Override
+        public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+          AlertDialog dialog = new AlertDialog.Builder(view.getContext()).
+            // As of now it is empty to match ios alert.
+            setTitle("").
+            setMessage(message).
+            setPositiveButton("OK", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialog, int which) {
+                //do nothing
+              }
+            }).create();
+          dialog.show();
+          result.confirm();
+          return true;
+        }
+
+       // Remove Url in the Android confirm title...
+       @Override
+       public boolean onJsConfirm(WebView view, String url, String message, final android.webkit.JsResult result) {
+         new AlertDialog.Builder(reactContext)
+           .setTitle("")
+           .setMessage(message)
+           .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+             public void onClick(DialogInterface dialog, int which) {
+               result.confirm();
+             }
+           })
+           .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+             public void onClick(DialogInterface dialog, int which) {
+               result.cancel();
+             }
+           })
+           .create()
+           .show();
+         return true;
+       }
 
         @Override
         public void onShowCustomView(View view, CustomViewCallback callback) {
